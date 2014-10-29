@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/integration/amqp http://www.springframework.org/schema/integration/amqp/spring-integration-amqp.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/rabbit http://www.springframework.org/schema/rabbit/spring-rabbit.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <beans profile="AMQP">
+
+        <context:property-placeholder location="META-INF/spring/integration/*.properties"/>
+
+        <bean id="jsonMessageConverter" class="org.springframework.amqp.support.converter.JsonMessageConverter"/>
+
+        <bean id="smsSender" class="org.springframework.integration.smsblaster.amqp.AmqpBlaster">
+            <property name="amqpTemplate" ref="amqpTemplate"/>
+            <property name="mongoTemplate" ref="mongoTemplate"/>
+            <property name="smsMessageRepository" ref="smsMessageRepository"/>
+        </bean>
+
+
+        <rabbit:listener-container connection-factory="connectionFactory" concurrency="6"
+                                   message-converter="jsonMessageConverter">
+            <rabbit:listener ref="amqpListener" queue-names="${sms.blaster.queue}" method="handleMessage"/>
+        </rabbit:listener-container>
+
+        <bean id="amqpListener" class="org.springframework.integration.amqp.listener.AmqpListener">
+            <property name="mongoTemplate" ref="mongoTemplate"/>
+            <property name="smsMessageRepository" ref="smsMessageRepository"/>
+        </bean>
+
+
+        <!-- Infrastructure -->
+
+        <rabbit:connection-factory id="connectionFactory" port="${rabbit.port}" host="${rabbit.host}"
+                                   password="${rabbit.password}" username="${rabbit.username}"/>
+
+        <rabbit:template id="amqpTemplate" connection-factory="connectionFactory" queue="blaster.in.queue"
+                         message-converter="jsonMessageConverter"
+                         exchange="blaster.exchange" routing-key="blaster.binding"/>
+
+        <rabbit:admin connection-factory="connectionFactory"/>
+
+        <rabbit:queue name="${sms.blaster.queue}"/>
+
+        <rabbit:direct-exchange name="blaster.exchange">
+            <rabbit:bindings>
+                <rabbit:binding queue="${sms.blaster.queue}" key="blaster.binding"/>
+            </rabbit:bindings>
+        </rabbit:direct-exchange>
+    </beans>
+
+    <beans profile="HTTP">
+        <bean id="smsSender" class="org.springframework.integration.smsblaster.http.HttpBlaster"/>
+    </beans>
+</beans>
+

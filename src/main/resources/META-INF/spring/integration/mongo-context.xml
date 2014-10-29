@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd">
+
+    
+    
+    <beans profile="amqp">
+    <!-- all Interfaces under the base package extending CrudRepository will be instantiated by spring to a default
+        repository implementation. If a custom repository is desired please create an interface and an bean implementing the methods-->
+
+    <mongo:repositories base-package="org.springframework.integration.mongo.repositories"
+                        mongo-template-ref="mongoTemplate"
+                        create-query-indexes="true" />
+
+    <mongo:db-factory id="mongoDbFactory"
+                      dbname="${mongo.db.name}"
+                      host="${mongo.host}"
+                      port="${mongo.port}"
+                      />
+
+    <!-- mongo db storage configuration -->
+    <mongo:mongo >
+        <mongo:options
+                connections-per-host="${mongo.connectionsPerHost}"
+                threads-allowed-to-block-for-connection-multiplier="${mongo.threadsAllowedToBlockForConnectionMultiplier}"
+                connect-timeout="${mongo.connectTimeout}"
+                max-wait-time="${mongo.maxWaitTime}"
+                auto-connect-retry="${mongo.autoConnectRetry}"
+                socket-keep-alive="${mongo.socketKeepAlive}"
+                socket-timeout="${mongo.socketTimeout}"
+                slave-ok="${mongo.slaveOk}"
+                write-number="1"
+                write-timeout="0"
+                write-fsync="${mongo.fsync}"/>
+    </mongo:mongo>
+
+    <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+        <constructor-arg name="mongoDbFactory" ref="mongoDbFactory"/>
+        <!-- Please read what this does before changing it.
+            If EXCEPTION or LOG is set the performance lowers very very much.-->
+        <property name="writeResultChecking">
+                  <value type="org.springframework.data.mongodb.core.WriteResultChecking">NONE</value>
+        </property>
+    </bean>
+
+    <bean id="mongoExceptionTranslator" class="org.springframework.data.mongodb.core.MongoExceptionTranslator"/>
+
+    </beans>
+
+</beans>
