@@ -3,22 +3,15 @@ Spring Integration - AMQP Sample
 
 # Overview
 
-This sample demonstrates basic functionality of the **Spring Integration AMQP Adapter**, which uses the [Advanced Message Queuing Protocol](http://www.amqp.org/) (AMQP) to send and retrieve messages. As AMQP Broker implementation the sample uses [RabbitMQ](http://www.rabbitmq.com/).
-
-Once the application is started, you enter some text on the command prompt and a message containing that entered text is dispatched to the AMQP queue. In return that message is retrieved by Spring Integration and then printed to the console. 
-
-> In order to run the example you will need a running  instance of RabbitMQ. A local installation with just the basic defaults will be sufficient. Please visit: [http://www.rabbitmq.com/install.html](http://www.rabbitmq.com/install.html) for detailed installation procedures.
+This sample demonstrates basic functionality of the **Spring Integration AMQP Adapter**, which uses the [Advanced Message Queuing Protocol](http://www.amqp.org/) (AMQP) to send and retrieve messages.
+As AMQP Broker implementation the sample uses [RabbitMQ](http://www.rabbitmq.com/).
+Additionally this example will dequeue the messages from the rabbit instance and store them on a local mongo instance.
 
 # How to Run the Sample
 
-If you imported the example into your IDE, you can just run class **org.springframework.integration.samples.amqp.Main**. For example in [SpringSource Tool Suite](http://www.springsource.com/developer/sts) (STS) do:
+Check src class org.springframework.integration.smsblaster.GenericOptions to find out the run options
 
-* Right-click on Main class --> Run As --> Java Application
-
-Alternatively, you can start the sample from the command line ([Maven](http://maven.apache.org/) required):
-
-* mvn package
-* mvn exec:java
+> In order to run the example you will need a running  instance of RabbitMQ and a running instance of mongo db. Configure the properties at /resources/mongo.properties and /resources/rabbit.properties.
 
 # Used Spring Integration components
 
@@ -27,6 +20,7 @@ Alternatively, you can start the sample from the command line ([Maven](http://ma
 * spring-integration-core
 * spring-integration-amqp
 * spring-integration-stream
+* spring-data-mongodb
 
 ### Spring Integration Adapters
 
